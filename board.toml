@@ -1,0 +1,29 @@
+[board]
+name = "x1s"
+soc = "Exynos990"
+description = "Samsung Galaxy S20 5G (SM-G981B): experimental iOS 27 port (iPhone 14 Pro identity)"
+kit = "x1s"
+
+# iOS 27.2 for iPhone15,2 (D73AP), the same build ios-guacamole runs on the same CPU generation (no PAC).
+# Its userland is arm64e: it is lowered to arm64 on the PC (lower_pac.py) before it goes on the phone.
+# Apple's files never go into this repository.
+[ipsw]
+product = "iPhone15,2"
+version = "27.2"
+build = "24B119"
+device_class = "d73ap"
+fetch = ["KernelCache", "DeviceTree", "StaticTrustCache", "Cryptex1,SystemTrustCache"]
+
+# Stage 1: Mu-Silicium UEFI with x1sPkg (the firmware Jesvi iOS already boots on this phone), from the boot partition.
+# Only the boot partition is ever written for tests (owner's rule).
+
+# Kernel: DEVELOPMENT build of xnu-12377 with UniXNU patches/xnu-12377 (x1s_defconfig).
+[kernel]
+outputs = ["build/xnu-12377.121.6/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf"]
+
+[payload]
+title = "Galaxy S20: iOS 27.2 24B119 (experimental)"
+# 12 GB in four banks (S-BOOT fills /memory); the kernel starts with the low banks.
+# CPUs: 4x Cortex-A55 MPIDR 0x0-0x3, 2x Cortex-A76 0x4-0x5, 2x Mongoose M5 0x100-0x101 (kept OFF: heat rule).
+cpu_regs = "0x0,0x1,0x2,0x3"
+kernel_args = ["-v", "debug=0x14e", "cpus=4"]

@@ -1,0 +1,23 @@
+# Galaxy S20 5G (x1s, Exynos 990): the xnu-12377 (iOS 26/27) kernel, DEVELOPMENT BCM2837 build of
+# UniXNU patches/xnu-12377. First target: the kernel builds; then the S20 pieces below.
+CONFIG_XNU_BUILD_SCRIPT="build-xnu-12377.sh"
+
+# The S20's generic timer (26 MHz; S-BOOT leaves CNTFRQ_EL0 unset, the loader sets it).
+CONFIG_XNU_NATIVE_ARCH_TIMER=y
+# Source crypto and pthread providers, as on zeta.
+CONFIG_XNU_SOURCE_CORECRYPTO14=y
+CONFIG_XNU_SOURCE_PTHREAD=y
+# Real DT platform expert and the boot CPU provider. NOTE: ArmCpu is GICv3; the S20 has a GIC-400 (GICv2,
+# distributor 0x10101000, CPU interface 0x10102000): a GICv2 path must be added before a phone test.
+CONFIG_XNU_ARM_DT_PLATFORM=y
+CONFIG_XNU_ARMCPU=y
+# Cortex-A55/A76 are ARMv8.2: PAN is present.
+CONFIG_XNU_NATIVE_PAN=y
+CONFIG_XNU_DT_PANIC_REGION=y
+CONFIG_XNU_TRUST_CACHE_RUNTIME=n
+
+# Still to add before the first phone test (from the iOS 16 S20 kernel, E:/jesvi-g981b):
+#  - GICv2 interrupt controller
+#  - heat guard: read BIG/MID/LITTLE every second, power off at 70 C (owner's rule)
+#  - 26 -> 24 MHz timebase presentation (iOS 27 assumes Apple's 24 MHz; ios-guacamole tb24 does 19.2 -> 24)
+#  - emulation of LDAPUR/STLUR, CFINV/RMIF/SETF, SB, DIT and the one libsystem_m LDRAB (ios-guacamole pac-emul)

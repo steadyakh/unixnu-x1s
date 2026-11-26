@@ -19,7 +19,7 @@ fetch = ["KernelCache", "DeviceTree", "StaticTrustCache", "Cryptex1,SystemTrustC
 
 # Kernel: DEVELOPMENT build of xnu-12377 with UniXNU patches/xnu-12377 (x1s_defconfig).
 [kernel]
-outputs = ["build/xnu-12377.121.6/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf"]
+outputs = ["build/xnu-12377.121.6/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837", "build/xnu-12377.121.6/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf"]
 
 [payload]
 title = "Galaxy S20: iOS 27.2 24B119 (experimental)"

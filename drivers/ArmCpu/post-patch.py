@@ -192,5 +192,11 @@ rep("""  registerService ();
   __atomic_store_n (&gBootRegistered, 1U, __ATOMIC_RELEASE);""")
 s += open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'heatguard.inc')).read()
 
+
+# ---- x1s bring-up bars in ArmCpu (x1s_bar() is in the kernel: patches/xnu-12377/zzz-x1s-zzzzzzzz-boot-markers) ----
+rep("bool ArmCpu::start (IOService *provider)\n{\n", "extern \"C\" void x1s_bar (unsigned, uint32_t);\nbool ArmCpu::start (IOService *provider)\n{\n  x1s_bar (27, 0xFFFFFFFF);                                  // white: ArmCpu::start\n")
+rep("    if ((!skipGic && !prepareGic ()) || !IOCPU::start (provider)) { return false; }",
+    "    if (!skipGic && !prepareGic ()) { x1s_bar (28, gGicV2 ? 0xFFFF8000 : 0xFFFF0000); return false; }   // orange/red: GIC setup failed (v2 / not v2)\n    x1s_bar (28, 0xFF00FF00);                                // green: GIC set up\n    if (!IOCPU::start (provider)) { x1s_bar (29, 0xFFFF0000); return false; }")
+
 open(p, 'w', newline='').write(s)
 print('patched', s.count('gGicV2'), 'uses')

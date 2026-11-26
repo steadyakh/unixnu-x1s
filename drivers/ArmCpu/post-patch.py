@@ -182,5 +182,15 @@ rep("""  for (unsigned i = 0; i < 8; i++) { out[i] = 0xdeadbeef; }
   if (gGicV2) { armcpu_gic_diag_stage = 0xe; return; }
   if (gDist == 0 || gFrames == 0)""")
 
+# ---- x1s heat guard (heatguard.inc beside this script): included at the end, started by the boot CPU ----
+import os
+rep("#include <pexpert/pexpert.h>\n", "#include <pexpert/pexpert.h>\n#include <IOKit/IOLib.h>\n#include <stddef.h>\n")
+rep("static bool gGicV2 = false;", "static void x1sHeatStart (void);\nstatic bool gGicV2 = false;")
+rep("""  registerService ();
+  __atomic_store_n (&gBootRegistered, 1U, __ATOMIC_RELEASE);""", """  registerService ();
+  x1sHeatStart ();                                           // x1s: the heat guard, before anything else can heat the phone
+  __atomic_store_n (&gBootRegistered, 1U, __ATOMIC_RELEASE);""")
+s += open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'heatguard.inc')).read()
+
 open(p, 'w', newline='').write(s)
 print('patched', s.count('gGicV2'), 'uses')
